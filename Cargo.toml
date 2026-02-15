@@ -1,0 +1,11 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+name = "fin_lib"
+version = "0.0.1"
+edition = "2024"
+
+[workspace.dependencies]
+scheduling = { workspace = true }
