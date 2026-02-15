@@ -9,3 +9,5 @@ edition = "2024"
 
 [workspace.dependencies]
 scheduling = { workspace = true }
+
+bizdate = { path = "bizdate" }

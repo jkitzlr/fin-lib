@@ -1,3 +1,4 @@
+use bizdate::{BusdayConvention, BusinessCalendar};
 use chrono::NaiveDate;
 
 use crate::period::Period;
@@ -18,6 +19,40 @@ impl SchedulePeriod {
         start_adj: NaiveDate,
         end_adj: NaiveDate,
     ) -> Self {
+        Self {
+            start,
+            end,
+            start_adj,
+            end_adj,
+        }
+    }
+
+    pub fn new_adjust(
+        start: NaiveDate,
+        end: NaiveDate,
+        buscal: &BusinessCalendar,
+        conv: BusdayConvention,
+    ) -> Self {
+        let start_adj = buscal.adjust(start, conv);
+        let end_adj = buscal.adjust(end, conv);
+        Self {
+            start,
+            end,
+            start_adj,
+            end_adj,
+        }
+    }
+
+    pub fn new_relative(
+        start: NaiveDate,
+        roll_conv: RollConvention,
+        period: Period,
+        buscal: &BusinessCalendar,
+        conv: BusdayConvention,
+    ) -> Self {
+        let end = roll_conv.next(start, period);
+        let start_adj = buscal.adjust(start, conv);
+        let end_adj = buscal.adjust(end, conv);
         Self {
             start,
             end,
@@ -58,6 +93,7 @@ impl SchedulePeriod {
 
 #[cfg(test)]
 mod tests {
+    use bizdate::{BusdayConvention, BusinessCalendar};
     use chrono::NaiveDate;
 
     use crate::{Period, RollConvention};
@@ -113,5 +149,38 @@ mod tests {
         assert!(LONG.is_stub(roll_conv, period));
         assert!(LONG.is_long_stub(roll_conv, period));
         assert!(!LONG.is_short_stub(roll_conv, period));
+    }
+
+    #[test]
+    fn test_new_adjust() {
+        let cal = BusinessCalendar::new(None::<Vec<NaiveDate>>, "1111100");
+
+        let start = NaiveDate::from_ymd_opt(2026, 2, 28).unwrap();
+        let end = NaiveDate::from_ymd_opt(2026, 8, 31).unwrap();
+        let rslt = SchedulePeriod::new_adjust(
+            start,
+            end,
+            &cal,
+            BusdayConvention::ModifiedFollowing,
+        );
+        assert_eq!(&rslt, REG);
+    }
+
+    #[test]
+    fn test_new_relative() {
+        let cal = BusinessCalendar::new(None::<Vec<NaiveDate>>, "1111100");
+        let roll_conv = RollConvention::Eom;
+        let period = Period::Months(6);
+
+        let start = NaiveDate::from_ymd_opt(2026, 2, 28).unwrap();
+
+        let rslt = SchedulePeriod::new_relative(
+            start,
+            roll_conv,
+            period,
+            &cal,
+            BusdayConvention::ModifiedFollowing,
+        );
+        assert_eq!(&rslt, REG);
     }
 }
