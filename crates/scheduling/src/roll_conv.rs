@@ -25,6 +25,8 @@ pub enum RollConvention {
     Bom,
     // Roll to the last calendar day of the month
     Eom,
+    // Don't do any adjustment
+    None,
 }
 
 impl Roll for RollConvention {
@@ -33,6 +35,7 @@ impl Roll for RollConvention {
             Self::DayOfMonth(d) => self.day_of_month(dt, d),
             Self::Bom => dt.with_day(1).unwrap(),
             Self::Eom => dt.with_day(dt.num_days_in_month() as u32).unwrap(),
+            Self::None => dt,
         }
     }
 }

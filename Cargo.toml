@@ -11,3 +11,5 @@ edition = "2024"
 scheduling = { workspace = true }
 
 bizdate = { path = "bizdate" }
+
+[workspace.lints.clippy]
